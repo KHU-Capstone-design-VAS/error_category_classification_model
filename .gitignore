@@ -12,3 +12,5 @@ tmp/
 transformer/
 
 data/*
+
+wandb

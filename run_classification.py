@@ -46,6 +46,7 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
 
+from transformers.trainer_callback import TrainerCallback
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.41.0.dev0")
@@ -270,6 +271,20 @@ def get_label_list(raw_dataset, split="train") -> List[str]:
     # we will treat the label list as a list of string instead of int, consistent with model.config.label2id
     label_list = [str(label) for label in label_list]
     return label_list
+
+
+class LogTrainingLossCallback(TrainerCallback):
+    def __init__(self, log_interval):
+        self.log_interval = log_interval
+        self.log_history = []
+
+    def on_log(self, args, state, control, logs=None, **kwargs):
+        if state.global_step % self.log_interval == 0:
+            loss = logs.get("loss")
+            if loss is not None:
+                self.log_history.append({"step": state.global_step, "loss": loss})
+                with open(os.path.join(args.output_dir, "training_loss_log.txt"), "a") as f:
+                    f.write(f"Step {state.global_step}: loss = {loss}\n")
 
 
 def main():
@@ -687,6 +702,8 @@ def main():
         tokenizer=tokenizer,
         data_collator=data_collator,
     )
+
+    trainer.add_callback(LogTrainingLossCallback(log_interval=1000))
 
     # Training
     if training_args.do_train:
