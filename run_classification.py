@@ -703,7 +703,7 @@ def main():
         data_collator=data_collator,
     )
 
-    trainer.add_callback(LogTrainingLossCallback(log_interval=1000))
+    trainer.add_callback(LogTrainingLossCallback(log_interval=100))
 
     # Training
     if training_args.do_train:
