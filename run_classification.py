@@ -273,7 +273,7 @@ def get_label_list(raw_dataset, split="train") -> List[str]:
     return label_list
 
 
-class LogTrainingLossCallback(TrainerCallback):
+class LogLossCallback(TrainerCallback):
     def __init__(self, log_interval):
         self.log_interval = log_interval
         self.log_history = []
@@ -282,10 +282,17 @@ class LogTrainingLossCallback(TrainerCallback):
         if state.global_step % self.log_interval == 0:
             loss = logs.get("loss")
             if loss is not None:
-                self.log_history.append({"step": state.global_step, "loss": loss})
+                self.log_history.append({"step": state.global_step, "training_loss": loss})
                 with open(os.path.join(args.output_dir, "training_loss_log.txt"), "a") as f:
-                    f.write(f"Step {state.global_step}: loss = {loss}\n")
+                    f.write(f"Step {state.global_step}: training loss = {loss}\n")
 
+    def on_evaluate(self, args, state, control, metrics=None, **kwargs):
+        if metrics is not None:
+            eval_loss = metrics.get("eval_loss")
+            if eval_loss is not None:
+                self.log_history.append({"step": state.global_step, "validation_loss": eval_loss})
+                with open(os.path.join(args.output_dir, "validation_loss_log.txt"), "a") as f:
+                    f.write(f"Step {state.global_step}: validation loss = {eval_loss}\n")
 
 def main():
     # See all possible arguments in src/transformers/training_args.py
@@ -703,7 +710,9 @@ def main():
         data_collator=data_collator,
     )
 
-    trainer.add_callback(LogTrainingLossCallback(log_interval=100))
+    
+
+    trainer.add_callback(LogLossCallback(log_interval=100))
 
     # Training
     if training_args.do_train:
