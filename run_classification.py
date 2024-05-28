@@ -29,6 +29,8 @@ import evaluate
 import numpy as np
 from datasets import Value, load_dataset
 
+import json
+
 import transformers
 from transformers import (
     AutoConfig,
@@ -39,6 +41,7 @@ from transformers import (
     HfArgumentParser,
     Trainer,
     TrainingArguments,
+    TrainerCallback,
     default_data_collator,
     set_seed,
 )
@@ -283,16 +286,19 @@ class LogLossCallback(TrainerCallback):
             loss = logs.get("loss")
             if loss is not None:
                 self.log_history.append({"step": state.global_step, "training_loss": loss})
-                with open(os.path.join(args.output_dir, "training_loss_log.txt"), "a") as f:
-                    f.write(f"Step {state.global_step}: training loss = {loss}\n")
+                self._write_log(args.output_dir)
 
     def on_evaluate(self, args, state, control, metrics=None, **kwargs):
-        if metrics is not None:
+        if state.global_step % 100 == 0 and metrics is not None:
             eval_loss = metrics.get("eval_loss")
             if eval_loss is not None:
                 self.log_history.append({"step": state.global_step, "validation_loss": eval_loss})
-                with open(os.path.join(args.output_dir, "validation_loss_log.txt"), "a") as f:
-                    f.write(f"Step {state.global_step}: validation loss = {eval_loss}\n")
+                self._write_log(args.output_dir)
+
+    def _write_log(self, output_dir):
+        log_file_path = os.path.join(output_dir, "loss_log.json")
+        with open(log_file_path, "w") as f:
+            json.dump(self.log_history, f, indent=4)
 
 def main():
     # See all possible arguments in src/transformers/training_args.py
@@ -709,8 +715,6 @@ def main():
         tokenizer=tokenizer,
         data_collator=data_collator,
     )
-
-    
 
     trainer.add_callback(LogLossCallback(log_interval=100))
 
