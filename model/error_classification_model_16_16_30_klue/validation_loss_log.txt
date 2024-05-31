@@ -1,1 +1,0 @@
-Step 136920: validation loss = 1.8779959678649902
