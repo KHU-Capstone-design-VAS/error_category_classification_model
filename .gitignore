@@ -11,6 +11,8 @@
 tmp/
 transformer/
 
+__pycache__
+
 data/*
 
 wandb
