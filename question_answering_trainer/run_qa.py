@@ -52,7 +52,6 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
 
-
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 # check_min_version("4.42.0.dev0")
 
@@ -685,11 +684,17 @@ def main():
         print('len of predictions: ', len(predictions))
         if len(predictions) <= 100:
             print('predictions: ', predictions)
+
+        print('len of references: ', len(references))
+        if len(references) <= 100:
+            print('references: ', references)
+        else:
+            print('references sample: ', references[:5])
         
         references = transform_references(references)
         predictions = transform_predictions(predictions)
     
-        return metric.compute(predictions=predictions, references=references[:1])
+        return metric.compute(predictions=predictions, references=references)
 
     # Initialize our Trainer
     trainer = QuestionAnsweringTrainer(

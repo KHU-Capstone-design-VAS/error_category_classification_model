@@ -17,8 +17,8 @@ tmp/
 transformer/
 model/
 
-__pycache__
+.vscode
 
-data/*
+data/x
 
 wandb
