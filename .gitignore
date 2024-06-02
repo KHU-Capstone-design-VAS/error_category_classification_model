@@ -3,6 +3,11 @@
 **/.DS_Store
 **/._.DS_Store
 
+__pycache__
+._.__pycache__
+**/.__pycache__
+**/._.__pycache__
+
 .ipynb_checkpoints
 ._.ipynb_checkpoints
 **/.ipynb_checkpoints
@@ -10,6 +15,9 @@
 
 tmp/
 transformer/
+model/
+
+__pycache__
 
 data/*
 

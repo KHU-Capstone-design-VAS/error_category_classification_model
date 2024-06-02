@@ -34,7 +34,7 @@ import json
 import transformers
 from transformers import (
     AutoConfig,
-    AutoModelForSequenceClassification,
+    AutoModelForTokenClassification,
     AutoTokenizer,
     DataCollatorWithPadding,
     EvalPrediction,
@@ -92,7 +92,7 @@ class DataTrainingArguments:
         },
     )
     text_column_delimiter: Optional[str] = field(
-        default=" ", metadata={"help": "THe delimiter to use to join text columns into a single sentence."}
+        default=" ", metadata={"help": "The delimiter to use to join text columns into a single sentence."}
     )
     train_split_name: Optional[str] = field(
         default=None,
@@ -284,15 +284,9 @@ class LogLossCallback(TrainerCallback):
     def on_log(self, args, state, control, logs=None, **kwargs):
         if state.global_step % self.log_interval == 0:
             loss = logs.get("loss")
+            eval_loss = logs.get("eval_loss")
             if loss is not None:
-                self.log_history.append({"step": state.global_step, "training_loss": loss})
-                self._write_log(args.output_dir)
-
-    def on_evaluate(self, args, state, control, metrics=None, **kwargs):
-        if state.global_step % 100 == 0 and metrics is not None:
-            eval_loss = metrics.get("eval_loss")
-            if eval_loss is not None:
-                self.log_history.append({"step": state.global_step, "validation_loss": eval_loss})
+                self.log_history.append({"step": state.global_step, "training_loss": loss, "validation_loss": eval_loss})
                 self._write_log(args.output_dir)
 
     def _write_log(self, output_dir):
@@ -370,7 +364,7 @@ def main():
     set_seed(training_args.seed)
 
     # Get the datasets: you can either provide your own CSV/JSON training and evaluation files, or specify a dataset name
-    # to load from huggingface/datasets. In ether case, you can specify a the key of the column(s) containing the text and
+    # to load from huggingface/datasets. In either case, you can specify the key of the column(s) containing the text and
     # the key of the column containing the label. If multiple columns are specified for the text, they will be joined together
     # for the actual text value.
     # In distributed training, the load_dataset function guarantee that only one local process can concurrently
@@ -468,7 +462,7 @@ def main():
     if is_regression:
         label_list = None
         num_labels = 1
-        # regession requires float as label type, let's cast it if needed
+        # regression requires float as label type, let's cast it if needed
         for split in raw_datasets.keys():
             if raw_datasets[split].features["label"].dtype not in ["float32", "float64"]:
                 logger.warning(
@@ -519,7 +513,7 @@ def main():
     config = AutoConfig.from_pretrained(
         model_args.config_name if model_args.config_name else model_args.model_name_or_path,
         num_labels=num_labels,
-        finetuning_task="text-classification",
+        finetuning_task="token-classification",
         cache_dir=model_args.cache_dir,
         revision=model_args.model_revision,
         token=model_args.token,
@@ -544,7 +538,7 @@ def main():
         token=model_args.token,
         trust_remote_code=model_args.trust_remote_code,
     )
-    model = AutoModelForSequenceClassification.from_pretrained(
+    model = AutoModelForTokenClassification.from_pretrained(
         model_args.model_name_or_path,
         from_tf=bool(".ckpt" in model_args.model_name_or_path),
         config=config,
