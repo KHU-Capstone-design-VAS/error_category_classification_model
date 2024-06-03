@@ -1,0 +1,7 @@
+from transformers import BertTokenizer, BertForSequenceClassification
+
+classification_model_path = "./model/error_classification_model_16_16_30_klue"
+classification_tokenizer = BertTokenizer.from_pretrained(classification_model_path)
+classification_model = BertForSequenceClassification.from_pretrained(classification_model_path)
+
+classification_model.eval()

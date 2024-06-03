@@ -1,8 +1,8 @@
-from models.model import tokenizer, model
 import torch
+from models.classification_model import classification_tokenizer, classification_model
 
-def predict(text: str) -> int:
-    inputs = tokenizer.encode_plus(
+def classification_predict(text: str) -> int:
+    inputs = classification_tokenizer.encode_plus(
         text,
         max_length=512,
         truncation=True,
@@ -10,7 +10,7 @@ def predict(text: str) -> int:
         return_tensors="pt"
     )
     with torch.no_grad():
-        outputs = model(**inputs)
+        outputs = classification_model(**inputs)
         logits = outputs.logits
         predicted_label = torch.argmax(logits, dim=1).item()
     return predicted_label

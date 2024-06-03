@@ -18,8 +18,8 @@ def make_question(label):
         return None
 
 # 학습된 모델 경로
-classification_model_path = "model/error_classification_model_16_16_30_klue"
-qa_model_path = "model/question-answering-temp"
+classification_model_path = "./model/error_classification_model_16_16_30_klue"
+qa_model_path = "./model/question-answering-temp"
 
 # @@@@ text classification 예측 수행
 
