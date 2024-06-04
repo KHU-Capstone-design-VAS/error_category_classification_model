@@ -1,10 +1,11 @@
 from fastapi import APIRouter, HTTPException
-from schemas.request import TextData
-from services.classification_prediction import classification_predict
-from services.question_answering_prediction import question_answering_predict
-from utils.make_question import make_question
+from request import TextData
+from classification_prediction import classification_predict
+from question_answering_prediction import question_answering_predict
+from make_question import make_question
 
 router = APIRouter()
+
 
 @router.post("/predict/")
 async def get_prediction(data: TextData):
@@ -18,16 +19,16 @@ async def get_prediction(data: TextData):
             start_index = question_answering_predict_result['start_index']
             end_index = question_answering_predict_result['end_index']
             return {
-                    "predicted_label": predicted_label,
-                    "question" : question,
-                    "answer" : answer,
-                    "start_index" : start_index,
-                    "end_index" : end_index,
-                    }
+                "predicted_label": predicted_label,
+                "question": question,
+                "answer": answer,
+                "start_index": start_index,
+                "end_index": end_index,
+            }
         else:
             return {
                 "predicted_label": predicted_label,
-                "question" : question,
+                "question": question,
             }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

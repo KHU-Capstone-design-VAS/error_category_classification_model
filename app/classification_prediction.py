@@ -1,5 +1,6 @@
 import torch
-from models.classification_model import classification_tokenizer, classification_model
+from classification_model import classification_tokenizer, classification_model
+
 
 def classification_predict(text: str) -> int:
     inputs = classification_tokenizer.encode_plus(

@@ -11,5 +11,5 @@ def make_question(label):
         return "키워드 또는 중요 내용 오류가 발생한 부분은?"
     elif label == 6:
         return "유사한 내용 반복 오류가 발생한 부분은?"
-    else :
+    else:
         return None

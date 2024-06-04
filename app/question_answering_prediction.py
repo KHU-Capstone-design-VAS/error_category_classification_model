@@ -1,8 +1,12 @@
+from typing import Dict, Any
+
 import torch
-from models.question_answering_model import question_answering_tokenizer, question_answering_model
+from question_answering_model import question_answering_tokenizer, question_answering_model
+
 
 # text_input : origin text, question : make_question 함수를 통해 나온 question
-def question_answering_predict(text_input: str, question: str) -> int:
+def question_answering_predict(text_input: str, question: str) -> dict[
+    str, int | int | float | float | bool | bool | Any]:
     inputs = question_answering_tokenizer.encode_plus(
         question,
         text_input,
@@ -17,10 +21,11 @@ def question_answering_predict(text_input: str, question: str) -> int:
         end_logits = outputs.end_logits
         start_index = torch.argmax(start_logits)
         end_index = torch.argmax(end_logits) + 1
-    answer = question_answering_tokenizer.convert_tokens_to_string(question_answering_tokenizer.convert_ids_to_tokens(inputs["input_ids"][0][start_index:end_index]))
+    answer = question_answering_tokenizer.convert_tokens_to_string(
+        question_answering_tokenizer.convert_ids_to_tokens(inputs["input_ids"][0][start_index:end_index]))
 
     return {
-        "answer" : answer,
-        "start_index" : start_index.item(),
-        "end_index" : end_index.item()
+        "answer": answer,
+        "start_index": start_index.item(),
+        "end_index": end_index.item()
     }
